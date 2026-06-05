@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: vanguard_ab_test
+
+    tables:
+      - name: df_final_demo
+      - name: df_final_experiment_clients
+      - name: df_final_web_data_pt_1
+      - name: df_final_web_data_pt_2

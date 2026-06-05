@@ -1,0 +1,9 @@
+gcp:
+  project_id: "ironhack-497023"
+  dataset: "vanguard_ab_test"
+
+tables:
+  int_experiment_journey: "ironhack-497023.vanguard_ab_test.int_experiment_journey"
+  int_digital_footprints: "ironhack-497023.vanguard_ab_test.int_digital_footprints"
+  int_client_dimension: "ironhack-497023.vanguard_ab_test.int_client_dimension"
+  int_journey_rank: "ironhack-497023.vanguard_ab_test.int_journey_rank"
