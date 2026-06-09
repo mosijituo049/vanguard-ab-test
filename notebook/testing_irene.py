@@ -8,9 +8,9 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.19.3
 #   kernelspec:
-#     display_name: venv
+#     display_name: Python 3 (ipykernel)
 #     language: python
-#     name: venv
+#     name: python3
 # ---
 
 # %%
@@ -18,6 +18,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import scipy.stats as st
+import statsmodels.api as sm
+from statsmodels.stats.proportion import proportions_ztest
+import plotly.express as px
 
 # %matplotlib inline
 
@@ -335,22 +339,38 @@ test_df.head()
 
 # %%
 # keep only relevant column for checking error and sort by visit and date so the steps are supposed to be sequential:
-test_error= test_df[['visit_id', 'process_step','step_num','date_time']]
-test_error=test_error.sort_values(['visit_id', 'date_time'], ascending=True)
+test_error= test_df[['client_id', 'visit_id', 'process_step','step_num','date_time']]
+test_error=test_error.sort_values(['client_id','visit_id', 'date_time'], ascending=True)
 test_error.head(20)
 test_error.info()
 
+# %%
+# Visit ids suspected to not be unique, there could be a visit id asigned to more than one client:
+visit_client_check = (test_df.groupby('visit_id')['client_id'].nunique().reset_index(name='n_clients'))
+
+problem_visits = visit_client_check[visit_client_check['n_clients'] > 1]
+
+problem_visits
 
 # %%
-# function to identify errors:
+# Checking to see examples of repeated visit ids for different clients:
+error_rows = test_df[test_df['visit_id'].isin(problem_visits['visit_id'])]
+
+error_rows = error_rows[['client_id', 'visit_id', 'process_step', 'step_num', 'date_time']].sort_values(['visit_id', 'client_id', 'date_time'])
+
+error_rows.head(40)
+
+
+# %%
+# Create a function to identify the errors (we consider an error everytime the succesion of the client isn't from one step to the next):
 
 def bool_error(series):
-    return (series.diff() <= 0) #only < if we don't consider repeating a step an error, <= if repeating a step means there's an error
+    return (series.diff() <= 0) # <= because repeating a step means there's an error
 
 
 # %%
-# new column with errors in boolean form:
-test_error["error"] = test_error.groupby("visit_id")["step_num"].transform(bool_error)
+# Create new column with the errors in boolean form by using the previously defined function:
+test_error['error'] = test_error.groupby(['client_id','visit_id'])['step_num'].transform(bool_error)
 test_error.head(20)
 test_error.info()
 
@@ -374,9 +394,13 @@ test_error['date_time'] = pd.to_datetime(
 )
 
 # %%
+<<<<<<< HEAD
 test_error['duration']=test_error.groupby("visit_id").date_time.diff()
 test_error['duration_sec'] = test_error['duration'].dt.total_seconds()
 
+=======
+test_error['duration']=test_error.groupby(['client_id','visit_id']).date_time.diff()
+>>>>>>> main
 test_error.head(20)
 
 # %%
@@ -480,9 +504,17 @@ control_df.step_num.value_counts()
 
 # %%
 # keep only relevant column for checking error and sort by visit and date so the steps are supposed to be sequential:
-control_error=control_df[['visit_id', 'process_step','step_num','date_time']]
-control_error=control_error.sort_values(['visit_id', 'date_time'], ascending=True)
+control_error=control_df[['client_id', 'visit_id', 'process_step','step_num','date_time']]
+control_error=control_error.sort_values(['client_id','visit_id', 'date_time'], ascending=True)
 control_error.head(20)
+
+# %%
+# Visit ids suspected to not be unique, there could be a visit id asigned to more than one client:
+visit_client_ccheck = (control_error.groupby('visit_id')['client_id'].nunique().reset_index(name='n_clients'))
+
+problem_visits_control = visit_client_ccheck[visit_client_ccheck['n_clients'] > 1]
+display(problem_visits_control)
+print(len(problem_visits_control))
 
 
 # %%
@@ -494,11 +526,11 @@ def bool_error(series):
 
 # %%
 # new column with errors in boolean form:
-control_error["error"] = control_error.groupby("visit_id")["step_num"].transform(bool_error)
+control_error['error'] = control_error.groupby(['client_id','visit_id'])['step_num'].transform(bool_error)
 control_error.head(20)
 
 # %%
-control_error["error"]=control_error.error.astype(int)
+control_error['error']=control_error.error.astype(int)
 control_error.head(20)
 
 # %%
@@ -513,13 +545,13 @@ print(f'The percentage of actions in the process that were errors was: {round(pc
 # Counting how many visits had errors:
 total_visits_control=control_error.visit_id.nunique
 print(total_visits_control)
-visits_with_erors= 
+#visits_with_erors= 
 
 # %% [markdown]
 # ## 3. Duration
 
 # %%
-control_error['duration']=control_error.groupby("visit_id").date_time.diff()
+control_error['duration']=control_error.groupby((['client_id','visit_id'])).date_time.diff()
 control_error.head(20)
 
 # %%
@@ -539,12 +571,235 @@ print(f'The completion rate for clients in the TEST group: {round(completion_rat
 print(f'The completion rate for clients in the CONTROL group: {round(ccompletion_rate*100,2)}% .')
 
 # %%
+
+# %%
 # Error rate (out of all transactions or visits?): 
 print(f'The error rate per action in the website for the TEST group: {round(pct_error_test*100,2)}% . ')
 print(f'The error rate per action in the website for the CONTROL group: {round(pct_error*100,2)}% . ')
 
-# %%
+# %% [markdown]
+# h0=completion rate test group is 5% > completion rate control group
+# h1=completion rate test group is 5% <= completion rate control group
+
+# %% [markdown]
+# statistic Z=p1-p2-d/sqrt
+# p-value=
+# a=0,05 IC=
+
+# %% [markdown]
+# hypothesis for completion rate
+# hypotheis for mean duration (two samples t-test) 
+
+# %% [markdown]
+# # HYPOTHESIS TESTING
+
+# %% [markdown]
+# ## 1. Completion rate
+
+# %% [markdown]
+# **TEST 1: Difference in the completion rates** 
+#
+# We want to know whether the **TEST group has a higher completion rate than the CONTROL group**.
+#
+# We will perform a one tailed Z-test with the rejection area to the left:
+#
+# - H0: completion rate test group >= completion rate control group
+# - H1: completion rate test group < completion rate control group
+#
+# alpha = 0.05
 
 # %%
+# H1: p1 > p2
+alpha = 0.05
+z_stat_sm, p_value_sm = proportions_ztest(count = [completed_clients, completed_cclients],nobs  = [total_clients, total_cclients]
+, alternative='smaller')
+
+print(f'Z-statistic: {z_stat_sm}')
+print(f'p-value: {p_value_sm}')
+
+
+# %% [markdown]
+# **Conclusions:**
+# After running a one-tailed two-proportion Z-test at α = 0.05:
+# - The p-value was above 0.05, so we **accept H₀**:
+# - The TEST group has a **statistically significantly higher** completion rate than the CONTROL group.
+
+# %%
+def show_statistical_test(statistic: float, alpha: float, n: int, distribution: str=["t-student","normal"], alternative: str=["two-sided","lower","greater"]):
+
+    if distribution not in ["t-student","normal"]:
+        raise TypeError("Sorry, only 't-student', and 'normal' distributions are acepted")
+
+    if alternative not in ["two-sided","lower","greater"]:
+        raise TypeError("Sorry, only 'two-sided', 'lower', and 'greated' are acepted valued for the alternative")
+
+    if not isinstance(statistic, float):
+        raise TypeError("Sorry, the data type for the statistic must be float")
+
+    if not isinstance(alpha, float):
+        raise TypeError("Sorry, the data type for alpha must be float")
+
+    if not isinstance(n, int):
+        raise TypeError("Sorry, the data type for n must be int")
+
+    x_values = np.linspace(-3, 3)
+
+    if distribution == "t-student":
+
+        y_values = st.t.pdf(x_values, df=n-1)
+
+        if alternative == "two-sided": # Computing the critical values
+
+            lower_critical_value = st.t.ppf(alpha/2, df=n-1)
+            upper_critical_value = st.t.ppf(1-(alpha/2), df=n-1)
+
+            x_values1 = np.linspace(-3, lower_critical_value)
+            y_values1 = st.t.pdf(x_values1, df=n-1)
+
+            x_values2 = np.linspace(upper_critical_value, 3)
+            y_values2 = st.t.pdf(x_values2, df=n-1)
+
+        elif alternative == "lower":
+
+            critical_value = st.t.ppf(alpha, df=n-1)
+
+            x_values1 = np.linspace(-3, critical_value)
+            y_values1 = st.t.pdf(x_values1, df=n-1)
+
+        elif alternative == "greater":
+
+            critical_value = st.t.ppf(1-alpha, df=n-1)
+
+            x_values2 = np.linspace(critical_value, 3)
+            y_values2 = st.t.pdf(x_values2, df=n-1)
+
+    elif distribution == "normal":
+
+        y_values = st.norm.pdf(x_values)
+
+        if alternative == "two-sided": # Computing the critical values
+
+            lower_critical_value = st.norm.ppf(alpha/2)
+            upper_critical_value = st.norm.ppf(1-(alpha/2))
+
+            x_values1 = np.linspace(-3, lower_critical_value)
+            y_values1 = st.norm.pdf(x_values1)
+
+            x_values2 = np.linspace(upper_critical_value, 3)
+            y_values2 = st.norm.pdf(x_values2)
+
+        elif alternative == "lower":
+
+            critical_value = st.norm.ppf(alpha)
+
+            x_values1 = np.linspace(-3, critical_value)
+            y_values1 = st.norm.pdf(x_values1)
+
+        elif alternative == "greater":
+
+            critical_value = st.norm.ppf(1-alpha)
+
+            x_values2 = np.linspace(critical_value, 3)
+            y_values2 = st.norm.pdf(x_values2)
+
+    df = pd.DataFrame({"x": x_values, "pdf": y_values})
+
+    title = f"{distribution} Probability Density Function"
+
+    fig = px.line(df, x="x", y="pdf", title=title)
+
+    if alternative == "two-sided":
+
+        fig.add_vline(x=lower_critical_value, line_color="red")
+        fig.add_vline(x=upper_critical_value, line_color="red")
+
+        fig.add_annotation(x=lower_critical_value,y=0,text=f"Lower critical value {lower_critical_value: .2f}",xref="x",yref="paper",yanchor="bottom")
+        fig.add_annotation(x=upper_critical_value,y=0,text=f"Upper critical value {upper_critical_value: .2f}",xref="x",yref="paper",yanchor="bottom")
+
+        fig.add_scatter(x=x_values1, y=y_values1,fill='tozeroy', mode='none' , fillcolor='red')
+        fig.add_scatter(x=x_values2, y=y_values2,fill='tozeroy', mode='none' , fillcolor='red')
+
+    elif alternative == "lower":
+
+        fig.add_vline(x=critical_value, line_color="red")
+        fig.add_annotation(x=critical_value,y=0,text=f"Critical value {critical_value: .2f}",xref="x",yref="paper",yanchor="bottom")
+
+        fig.add_scatter(x=x_values1, y=y_values1,fill='tozeroy', mode='none' , fillcolor='red')
+
+    elif alternative == "greater":
+
+        fig.add_vline(x=critical_value, line_color="red")
+        fig.add_annotation(x=critical_value,y=0,text=f"Critical value {critical_value: .2f}",xref="x",yref="paper",yanchor="bottom")
+
+        fig.add_scatter(x=x_values2, y=y_values2,fill='tozeroy', mode='none' , fillcolor='red')
+
+    fig.add_vline(x=statistic)
+    fig.add_annotation(x=statistic,y=0,text=f"Statistic {statistic: .2f}",xref="x",yref="paper",yanchor="bottom")
+
+    fig.update_layout(title_text=f'{distribution} Probability Density Function', title_x=0.5)
+
+    fig.update_layout(showlegend=False)
+
+    fig.show()
+
+
+# %%
+show_statistical_test(
+    statistic=float(z_stat_sm),
+    alpha=0.05,
+    n=int(total_clients + total_cclients),
+    distribution="normal",
+    alternative="lower"
+)
+
+# %% [markdown]
+# **TEST 2: the difference in completion rates is above 0.05**
+#
+# Now we will be testing whether the observed difference between the completion rates of the control and test group **meets a minimum  threshold** where **∂=0.05**. We are running a one-tailed two-proportion Z-test with the rejection area to the right. 
+#
+# - H0 = completion rate test group - completion rate control group <= 0.05
+# - H1 = completion rate test group - completion rate control group > 0.05
+#
+# alpha= 0.05
+# group_1=test_group
+# group_2=control_group
+#
+
+# %%
+p1=completion_rate_user
+p2=completion_rate_cuser
+n1=total_clients
+n2=total_cclients
+p=(completed_clients+completed_cclients)/(n1+n2)
+print(p)
+
+# %%
+# Calculate the statistic Z manually using formula:
+alpha=0.05
+delta=0.05
+Z=((p1-p2)-delta)/ np.sqrt(p * (1 - p) * ((1 / n1) + (1 / n2)))
+print(f'Z={Z}')
+
+# %%
+# get the critical value using scipy stats:
+df=n1+n2-2
+cv=st.t.ppf(alpha,df)
+print(f'CV={cv}')
+
+
+# %%
+def h0_test(z,cv):
+    if z<cv:
+        print('Reject H0')
+    else:
+        print('Accept H0')
+
+
+
+# %%
+h0_test(Z,cv)
+
+# %%
+show_statistical_test(Z, alpha, df, distribution="normal", alternative="greater")
 
 # %%
