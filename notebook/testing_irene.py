@@ -342,6 +342,7 @@ test_df.head()
 test_error= test_df[['client_id', 'visit_id', 'process_step','step_num','date_time']]
 test_error=test_error.sort_values(['client_id','visit_id', 'date_time'], ascending=True)
 test_error.head(20)
+test_error.info()
 
 # %%
 # Visit ids suspected to not be unique, there could be a visit id asigned to more than one client:
@@ -371,10 +372,12 @@ def bool_error(series):
 # Create new column with the errors in boolean form by using the previously defined function:
 test_error['error'] = test_error.groupby(['client_id','visit_id'])['step_num'].transform(bool_error)
 test_error.head(20)
+test_error.info()
 
 # %%
 test_error['error']=test_error.error.astype(int)
 test_error.head(20)
+test_error['date_time'].isna().sum()
 
 # %%
 n_test_error=test_error.error.sum()
@@ -386,13 +389,37 @@ print(f'The percentage of actions in the process that were errors was: {round(pc
 
 # %% [markdown]
 # ## 3. Duration: average time users take to finish a step
+test_error['date_time'] = pd.to_datetime(
+    test_error['date_time']
+)
 
 # %%
+<<<<<<< HEAD
+test_error['duration']=test_error.groupby("visit_id").date_time.diff()
+test_error['duration_sec'] = test_error['duration'].dt.total_seconds()
+
+=======
 test_error['duration']=test_error.groupby(['client_id','visit_id']).date_time.diff()
+>>>>>>> main
 test_error.head(20)
 
 # %%
-step_avg=test_error.groupby('step_num').duration.mean()
+(len(test_error) - test_error['visit_id'].nunique()) == test_error['duration_sec'].count()
+print(len(test_error))
+print(test_error['visit_id'].nunique())
+print(test_error['duration_sec'].count())
+
+# %%
+test_error.info()
+test_error[
+    test_error.duplicated(
+        ['visit_id','date_time'],
+        keep=False
+    )
+].shape
+
+# %%
+step_avg=test_error.groupby('step_num').duration_sec.mean()
 
 # %%
 step_avg

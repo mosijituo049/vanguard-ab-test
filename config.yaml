@@ -1,3 +1,8 @@
+path:
+  funnel: "../data/clean/funnel.csv"
+  duration: "../data/clean/duration.csv"
+  transition: "../data/clean/transition.csv"
+
 gcp:
   project_id: "ironhack-497023"
   dataset: "vanguard_ab_test"
@@ -7,3 +12,6 @@ tables:
   int_digital_footprints: "ironhack-497023.vanguard_ab_test.int_digital_footprints"
   int_client_dimension: "ironhack-497023.vanguard_ab_test.int_client_dimension"
   int_journey_rank: "ironhack-497023.vanguard_ab_test.int_journey_rank"
+  mart_funnel: "ironhack-497023.vanguard_ab_test.mart_funnel"
+  mart_duration: "ironhack-497023.vanguard_ab_test.mart_duration"
+  mart_transition: "ironhack-497023.vanguard_ab_test.mart_transition"
