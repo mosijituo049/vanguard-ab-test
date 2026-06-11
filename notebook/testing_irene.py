@@ -394,13 +394,7 @@ test_error['date_time'] = pd.to_datetime(
 )
 
 # %%
-<<<<<<< HEAD
-test_error['duration']=test_error.groupby("visit_id").date_time.diff()
-test_error['duration_sec'] = test_error['duration'].dt.total_seconds()
-
-=======
 test_error['duration']=test_error.groupby(['client_id','visit_id']).date_time.diff()
->>>>>>> main
 test_error.head(20)
 
 # %%

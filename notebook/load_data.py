@@ -48,7 +48,37 @@ def query_transition():
         return df_transition
     except Exception as e:
         print(e)
-        return pd.DataFrame()            
+        return pd.DataFrame()    
+
+def query_completion_time():
+    try:
+        client = bigquery.Client()
+        query_completion_time = f"""
+        SELECT *
+        FROM {config['tables']['mart_completion_time']}
+        """
+        df_completion_time = client.query(query_completion_time).to_dataframe()
+        df_completion_time.to_csv(config['path']['completion_time'],index=False)
+        print("completion time table loaded!")
+        return df_completion_time
+    except Exception as e:
+        print(e)
+        return pd.DataFrame()
+
+def query_client():
+    try:
+        client = bigquery.Client()
+        query_client = f"""
+        SELECT *
+        FROM {config['tables']['int_client_dimension']}
+        """
+        df_client = client.query(query_client).to_dataframe()
+        df_client.to_csv(config['path']['client'],index=False)
+        print("client table loaded!")
+        return df_client
+    except Exception as e:
+        print(e)
+        return pd.DataFrame()               
 
 def query(table):
     if table == "funnel":
@@ -60,8 +90,14 @@ def query(table):
     elif table == "transition":
         return query_transition()
     
+    elif table == "completion_time":
+        return query_completion_time()
+    
+    elif table == "client":
+        return query_client()
+    
     else:
-        print(f"{table} doesn't esist!")
+        print(f"{table} doesn't exist!")
         return pd.DataFrame() 
 
 def load(table):
@@ -79,3 +115,17 @@ def load(table):
     else:
         print(f"{table} table loaded!")
         return df
+
+def reload():
+    query_funnel()
+    query_duration()
+    query_transition()
+    query_completion_time()
+    query_client()
+    print("all tables reloaded!")
+
+
+if __name__ == "__main__":
+    table = input("what table you want to load?")
+    df = load(table)
+    df.head()
