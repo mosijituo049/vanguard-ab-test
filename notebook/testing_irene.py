@@ -389,12 +389,18 @@ print(f'The percentage of actions in the process that were errors was: {round(pc
 
 # %% [markdown]
 # ## 3. Duration: average time users take to finish a step
-test_error['date_time'] = pd.to_datetime(
-    test_error['date_time']
-)
+# test_error['date_time'] = pd.to_datetime(
+#     test_error['date_time']
+# )
 
 # %%
+# HEAD
+test_error['duration']=test_error.groupby("visit_id").date_time.diff()
+test_error['duration_sec'] = test_error['duration'].dt.total_seconds()
+
+#
 test_error['duration']=test_error.groupby(['client_id','visit_id']).date_time.diff()
+# main
 test_error.head(20)
 
 # %%
@@ -423,6 +429,9 @@ step_error=test_error[test_error['error']==0].groupby('step_num').duration.mean(
 
 # %%
 step_error
+
+# %%
+len(test_error[test_error['error']==0])
 
 # %% [markdown]
 # # CONTROL CLIENTS KPI ANALYSIS 
@@ -603,7 +612,7 @@ print(f'The error rate per action in the website for the CONTROL group: {round(p
 # alpha = 0.05
 
 # %%
-# H1: p1 > p2
+# H1: p1 < p2
 alpha = 0.05
 z_stat_sm, p_value_sm = proportions_ztest(count = [completed_clients, completed_cclients],nobs  = [total_clients, total_cclients]
 , alternative='smaller')
@@ -795,5 +804,61 @@ h0_test(Z,cv)
 
 # %%
 show_statistical_test(Z, alpha, df, distribution="normal", alternative="greater")
+
+# %% [markdown]
+# ## 2. Duration 
+
+# %% [markdown]
+# T STUDENT DISTRIBUTION: two sided T-test. We're going to compare the means of the duration for each step in the test group vs control group.
+#
+# - H0: avg step duration from TEST group = avg step duration from CONTROL group
+# - H1: avg step duration from TEST group != avg step duration from CONTROL group
+#
+# Testing the average time withput the errors.
+
+# %%
+# create array for test and error only with stpe 1 times and no errors:
+
+test_s1_df= test_error[(test_error['error'] == 0) &(test_error['step_num'] == 1)]['duration']
+test_s1_mean=test_s1_df.mean().total_seconds()
+
+control_s1_df= control_error[(control_error['error']==0) & (control_error['step_num']==1)]['duration']
+control_s1_mean=control_s1_df.mean().total_seconds()
+f'Test S1 mean: {test_s1_mean}, Control S1 mean:{control_s1_mean}'
+
+# %%
+# STEP 1
+
+
+x1= test_s1_mean
+x2= control_s1_mean
+
+n1=len(test_s1_df)
+n2=len(control_s1_df)
+
+test_duration_std=test_s1_df.std()
+control_duration_std=control_s1_df.std()
+s1=test_duration_std.total_seconds()
+s2=control_duration_std.total_seconds()
+
+print(f'x1: {x1}, x2: {x2}, n1: {n1}, n2: {n2}, s1: {s1}, s2: {s2}')
+
+# %%
+Tstatistic= (x1-x2)/np.sqrt((s1**2/n1)+ (s2**2/n2))
+f'T-statistic: {Tstatistic}'
+
+# %%
+show_statistical_test(Tstatistic, 0.05, n1+n2-2, distribution="t-student", alternative="two-sided")
+
+# %%
+df_test_s1= test_error[(test_error['error'] == 0) &(test_error['step_num'] == 1)]
+df_control_s1=control_error[(control_error['error']==0) & (control_error['step_num']==1)]
+
+# %%
+st.ttest_ind(df_test_s1['duration'], df_control_s1['duration'], equal_var=False, alternative="two-sided")
+
+# %%
+
+# %%
 
 # %%
