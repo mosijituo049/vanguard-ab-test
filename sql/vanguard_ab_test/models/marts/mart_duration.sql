@@ -1,6 +1,7 @@
 SELECT jr.client_id,
     jr.variation,
     jr.process_step,
+    jr.date_time,
     TIMESTAMP_DIFF(
             next_time,
             date_time,

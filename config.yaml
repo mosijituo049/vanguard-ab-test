@@ -2,6 +2,8 @@ path:
   funnel: "../data/clean/funnel.csv"
   duration: "../data/clean/duration.csv"
   transition: "../data/clean/transition.csv"
+  completion_time: "../data/clean/completion_time.csv"
+  client: "../data/clean/client_profile.csv"
 
 gcp:
   project_id: "ironhack-497023"
@@ -15,3 +17,4 @@ tables:
   mart_funnel: "ironhack-497023.vanguard_ab_test.mart_funnel"
   mart_duration: "ironhack-497023.vanguard_ab_test.mart_duration"
   mart_transition: "ironhack-497023.vanguard_ab_test.mart_transition"
+  mart_completion_time: "ironhack-497023.vanguard_ab_test.mart_completion_time"

@@ -1,11 +1,13 @@
 SELECT
     jr.client_id,
     jr.variation,
-    jr.visit_seq,
+    -- jr.visit_seq,
     jr.step_rank,
-    jr.next_rank,
+    -- jr.next_rank,
 
-    next_rank - step_rank AS step_diff,
+    -- next_rank - step_rank AS step_diff,
+
+    -- jr.date_time,
 
     CASE
         WHEN next_rank IS NULL THEN 'end'

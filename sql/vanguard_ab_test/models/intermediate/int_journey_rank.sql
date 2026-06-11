@@ -15,18 +15,20 @@ WITH base AS (
 
 )
 
---journey AS (
+-- journey AS (
 
     SELECT
         *,
 
         ROW_NUMBER() OVER (
-            PARTITION BY client_id, visitor_id, visit_id
+            -- PARTITION BY client_id, visitor_id, visit_id
+            PARTITION BY client_id
             ORDER BY date_time, step_rank
         ) AS visit_seq,
 
         CASE LEAD(process_step) OVER (
-            PARTITION BY client_id, visitor_id, visit_id
+            -- PARTITION BY client_id, visitor_id, visit_id
+            PARTITION BY client_id
             ORDER BY date_time, step_rank
         )
             WHEN 'start' THEN 1
@@ -42,6 +44,7 @@ WITH base AS (
 
         LEAD(date_time) OVER (
             PARTITION BY client_id, visitor_id, visit_id
+            -- PARTITION BY client_id
             ORDER BY date_time, step_rank
         ) AS next_time
 
@@ -51,10 +54,10 @@ WITH base AS (
 -- journey_rank AS (
 
     /*SELECT
-        *,*/
+        *,
         
         --move duration_sec to mart duration
-        /*TIMESTAMP_DIFF(
+        TIMESTAMP_DIFF(
             next_time,
             date_time,
             SECOND
@@ -68,9 +71,9 @@ WITH base AS (
             WHEN 'step_2' THEN 3
             WHEN 'step_3' THEN 4
             WHEN 'confirm' THEN 5
-        END AS next_rank
+        END AS next_rank*/
 
-    FROM journey*/
+    -- FROM journey
 
 -- )
 
