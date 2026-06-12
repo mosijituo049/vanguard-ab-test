@@ -120,11 +120,11 @@ Interactive dashboards (KPI overview, demographic drill-down, and client journey
 
 ## Presentation
 
-🔗 [Project Presentation Slides](#) — *[Add Google Slides link here]*
+🔗 [Project Presentation Slides](https://docs.google.com/presentation/d/1dsoeA_g5PVjCXVVKTUD18ZGEn1KEelbn/edit?usp=sharing&ouid=106830695445682190716&rtpof=true&sd=true))
 
 ## Authors
 
 - Irene Fafian
-- Zhiwen ??
+- Zhiwen Mo
 
 
