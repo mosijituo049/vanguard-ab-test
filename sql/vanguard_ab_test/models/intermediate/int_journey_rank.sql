@@ -26,7 +26,7 @@ WITH base AS (
             ORDER BY date_time, step_rank
         ) AS visit_seq,
 
-        CASE LEAD(process_step) OVER (
+        /*CASE LEAD(process_step) OVER (
             -- PARTITION BY client_id, visitor_id, visit_id
             PARTITION BY client_id
             ORDER BY date_time, step_rank
@@ -36,7 +36,14 @@ WITH base AS (
             WHEN 'step_2' THEN 3
             WHEN 'step_3' THEN 4
             WHEN 'confirm' THEN 5
-        END AS next_rank,
+        END AS next_rank,*/
+
+        LEAD(step_rank) OVER (
+            -- PARTITION BY client_id, visitor_id, visit_id
+            PARTITION BY client_id
+            ORDER BY date_time, step_rank
+        ) AS next_rank,
+
         /*LEAD(process_step) OVER (
             PARTITION BY client_id, visitor_id, visit_id
             ORDER BY date_time, step_rank
